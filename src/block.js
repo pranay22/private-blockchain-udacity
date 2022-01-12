@@ -38,14 +38,22 @@ class Block {
     validate() {
         let self = this;
         return new Promise((resolve, reject) => {
-            // Save in auxiliary variable the current block hash
-                                            
-            // Recalculate the hash of the Block
-            // Comparing if the hashes changed
-            // Returning the Block is not valid
-            
-            // Returning the Block is valid
+            try {
+                // Save in auxiliary variable the current block hash
+                const currentHash = self.hash;
+                self.hash = null;
+                // Recalculate the hash of the Block
+                const newCalcHash = SHA256(JSON.stringify(this)).toString();
+                // Setting previous hash value back
+                self.hash = currentHash;
+                // Comparing if the hashes changed
+                // Returning the Block is not valid
 
+                // Returning the Block is valid
+                resolve(currentHash === newCalcHash);
+            } catch (error) {
+                reject(new BlockValidationError(error));
+            }  
         });
     }
 
@@ -67,6 +75,20 @@ class Block {
 
     }
 
+}
+
+class BlockValidationError extends Error {
+    constructor(e) {
+        super(e);
+        this.name = "BlockValidationError";
+    }
+}
+
+class GetBlockDataError extends Error {
+    constructor(e) {
+        super(e);
+        this.name = "GetBlockDataError";
+    }
 }
 
 module.exports.Block = Block;                    // Exposing the Block class as a module
