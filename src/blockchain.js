@@ -224,7 +224,36 @@ class Blockchain {
         let self = this;
         let errorLog = [];
         return new Promise(async (resolve, reject) => {
-            // todo: later
+            for (let i = 0; i < self.chain.length; i++) {
+                try {
+                  const block = self.chain[i];
+                  const previousBlock = self.chain[i - 1];
+                  // Check if block is valid or not
+                  const blockIsNotTampered = await block.validate();
+                  if (!blockIsNotTampered) {
+                    errorLog.push(
+                      new ValidationErrorLog("Block is not valid", {
+                        hash: block.hash,
+                        height: block.height,
+                      })
+                    );
+                  }
+        
+                  if (block.previousBlockHash && previousBlock &&block.previousBlockHash !== previousBlock.hash) {
+                    errorLog.push(
+                      new ValidationErrorLog("Block is wrongly linked", {
+                        hash: block.hash,
+                        height: block.height,
+                        previousBlockHashOnBlock: block.previousBlockHash,
+                        previousBlockHashOnChain: previousBlock.hash,
+                      })
+                    );
+                  }
+                } catch (e) {
+                  reject(e);
+                }
+              }
+              resolve(errorLog);
         });
     }
 
@@ -255,6 +284,18 @@ class GetStarByWallerAddressError extends Error {
     constructor(e) {
         super(e);
         this.name = "GetStarByWallerAddressError";
+    }
+}
+
+class ValidateChainErrorLog {
+    constructor(errorMessage, data) {
+        this.errorMessage = errorMessage;
+        this.data = data;
+    }
+    buildObject() {
+        return { 
+            errorMessage: this.errorMessage, data: this.data 
+        };
     }
 }
 
