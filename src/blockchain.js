@@ -155,7 +155,17 @@ class Blockchain {
     getBlockByHash(hash) {
         let self = this;
         return new Promise((resolve, reject) => {
-           
+            try {
+                const block = self.chain.filter(b => b.hash === hash);
+                if (typeof block != 'undefined'){
+                    resolve(block); 
+                }else{
+                    throw new GetBlockByHashError("No block with this hash");
+                }   
+            } catch (e) {
+                reject(e instanceof GetBlockByHashError ? e : new GetBlockByHashError(e.message));
+            }
+                  
         });
     }
 
@@ -217,6 +227,13 @@ class StarSubmitError extends Error {
     constructor(e) {
         super(e);
         this.name = "StarSubmitError";
+    }
+}
+
+class GetBlockByHashError extends Error {
+    constructor(e) {
+        super(e);
+        this.name = "GetBlockByHashError";
     }
 }
 
