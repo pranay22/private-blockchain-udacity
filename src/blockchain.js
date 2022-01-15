@@ -196,7 +196,21 @@ class Blockchain {
         let self = this;
         let stars = [];
         return new Promise((resolve, reject) => {
-            
+            try {
+                self.chain.forEach(async(block)=> {
+                    // Fetch decoded data from each block
+                    let data = await block.getBData();
+                    if(data){
+                        // Check if star owner's address is passed, if yes, add it
+                        if(data.owner === address){
+                          stars.push(data);
+                        }
+                    }
+                })
+                resolve(stars);
+            } catch(e) {
+                reject(e instanceof GetStarByWallerAddressError ? e : new GetStarByWallerAddressError(e.message));
+            }
         });
     }
 
@@ -210,7 +224,7 @@ class Blockchain {
         let self = this;
         let errorLog = [];
         return new Promise(async (resolve, reject) => {
-            
+            // todo: later
         });
     }
 
