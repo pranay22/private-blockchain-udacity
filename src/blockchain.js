@@ -101,7 +101,8 @@ class Blockchain {
      */
     requestMessageOwnershipVerification(address) {
         return new Promise((resolve) => {
-            
+            const ownershipMsg = `${address}:${new Date().getTime().toString().slice(0, -3)}:starRegistry`;
+            resolve(ownershipMsg);
         });
     }
 
@@ -125,7 +126,23 @@ class Blockchain {
     submitStar(address, message, signature, star) {
         let self = this;
         return new Promise(async (resolve, reject) => {
-            
+            try {
+                let msgTime = parseInt(message.split(':')[1]);
+                let currentTime = parseInt(new Date().getTime().toString().slice(0, -3));
+                if(currentTime - msgTime < (5*60)){
+                    if (bitcoinMessage.verify(message, address, signature)){
+                        let newBlock = new BlockClass.Block({"owner":address, "star":star});
+                        self._addBlock(newBlock);
+                        resolve(newBlock);
+                    } else {
+                        throw new StarSubmitError("Message varification failed");
+                    }
+                } else {
+                    throw new StarSubmitError("Too much time spent. Max time is 5 minutes");
+                }
+            } catch (e) {
+                reject(e instanceof StarSubmitError ? e : new StarSubmitError(e.message));
+            }
         });
     }
 
@@ -200,6 +217,13 @@ class StarSubmitError extends Error {
     constructor(e) {
         super(e);
         this.name = "StarSubmitError";
+    }
+}
+
+class GetStarByWallerAddressError extends Error {
+    constructor(e) {
+        super(e);
+        this.name = "GetStarByWallerAddressError";
     }
 }
 
