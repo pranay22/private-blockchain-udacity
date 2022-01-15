@@ -64,7 +64,30 @@ class Blockchain {
     _addBlock(block) {
         let self = this;
         return new Promise(async (resolve, reject) => {
-           
+            try {
+                // Get current blockchain length and assign it as current block height
+                let chainLength = self.chain.length;
+                block.height = chainLength;
+                // If this is not genesis block, assign previous block hash
+                if(chainLength>0){
+                let previousBlock = self.chain[chainLength -1];
+                block.previousBlockHash = previousBlock.hash;
+                }
+                // Get current time and assign it as block time
+                block.time = new Date().getTime().toString().slice(0,-3);
+                // Finally, generate block hash
+                block.hash = SHA256(JSON.stringify(block)).toString();
+                // Validate
+                let errors = await self.validateChain();
+                if(errors.length) {
+                    throw new Error ("invalid blockchain");
+                }
+                self.chain.push(block);
+                self.height++;
+                resolve(block);
+            } catch (e) {
+                reject(new AddNewBlockGenError(e.message));
+            } 
         });
     }
 
@@ -164,6 +187,20 @@ class Blockchain {
         });
     }
 
+}
+
+class AddNewBlockGenError extends Error {
+    constructor(e) {
+        super(e);
+        this.name = "AddNewBlockGenError";
+    }
+}
+
+class StarSubmitError extends Error {
+    constructor(e) {
+        super(e);
+        this.name = "StarSubmitError";
+    }
 }
 
 module.exports.Blockchain = Blockchain;   
