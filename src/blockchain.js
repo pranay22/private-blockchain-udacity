@@ -156,7 +156,8 @@ class Blockchain {
         let self = this;
         return new Promise((resolve, reject) => {
             try {
-                const block = self.chain.filter(b => b.hash === hash);
+                // Using find() instead of filter() as per the review suggestion
+                const block = self.chain.find(b => b.hash === hash);
                 if (typeof block != 'undefined'){
                     resolve(block); 
                 }else{

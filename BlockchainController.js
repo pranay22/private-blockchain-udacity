@@ -4,6 +4,8 @@
  * This class expose the endpoints that the client applications will use to interact with the 
  * Blockchain dataset
  */
+
+const SHA256 = require('crypto-js/sha256');
 class BlockchainController {
 
     //The constructor receive the instance of the express.js app and the Blockchain class
@@ -17,6 +19,7 @@ class BlockchainController {
         this.getBlockByHash();
         this.getStarsByOwner();
         this.validateBlockChain();
+        this.validateTest();
     }
 
     // Enpoint to Get a Block by Height (GET Endpoint)
@@ -131,6 +134,12 @@ class BlockchainController {
             } catch (error) {
                 return res.status(500).json(error);
             }
+        });
+    }
+
+    validateTest() {
+        this.app.get("/test", async (req, res) => {
+            return res.status(200).send("Hello World!");
         });
     }
 
